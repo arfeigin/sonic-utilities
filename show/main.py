@@ -1839,6 +1839,46 @@ def peer(db, peer_ip):
 
     click.echo(tabulate(bfd_body, bfd_headers))
 
+#
+# 'tx_monitoring' group ("show tx-monitoring ...")
+#
+@cli.group(cls=clicommon.AliasedGroup)
+def tx_monitoring():
+    """Show details of the TX errors monitoring"""
+    pass
+
+#
+# 'config' subcommand ("show tx-monitoring config")
+#
+@tx_monitoring.command('config')
+def config():
+    """Show TX errors monitoring configuration"""
+    config_db = ConfigDBConnector()
+    config_db.connect()
+    tx_monitoting_cfg = config_db.get_table('TX_ERRORS_MONITORING')
+    config_vals = tx_monitoting_cfg['Config']
+    click.echo('Polling period: %s' % config_vals['Polling period'])
+    click.echo('Threshold: %s' % config_vals['Threshold'])
+
+#
+# 'status' subcommand ("show tx-monitoring status")
+#
+@tx_monitoring.command('status')
+def status():
+    """Show ports's TX errors status"""
+    state_db = SonicV2Connector(host='127.0.0.1')
+    state_db.connect(state_db.STATE_DB, False)
+
+    tx_keys = state_db.keys(state_db.STATE_DB, "TX_ERRORS_STATUS_TABLE|*")
+    tx_headers = ['Interface', 'Status']
+    tx_body = []    
+
+    if tx_keys is not None:
+        for key in tx_keys:
+            iface_name= (key.split('|'))[1]
+            state = state_db.get(state_db.STATE_DB, key, 'Status')
+            tx_body.append([iface_name, state])
+    click.echo(tabulate(natsorted(tx_body), tx_headers))
 
 # Load plugins and register them
 helper = util_base.UtilHelper()

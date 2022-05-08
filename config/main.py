@@ -6423,5 +6423,42 @@ def del_subinterface(ctx, subinterface_name):
 
     config_db.set_entry('VLAN_SUB_INTERFACE', subinterface_name, None)
 
+#
+# Adds <key,value> to the tx monitoring config table
+#
+def tx_config(txKey, txVal):
+    config_db = ConfigDBConnector()
+    config_db.connect()
+    config_db.mod_entry('TX_ERRORS_MONITORING', 'Config', {txKey: txVal})
+
+#
+# 'tx_monitoring' group ('config tx-monitoring ...'
+#
+@config.group(cls=clicommon.AbbreviationGroup)
+@click.pass_context
+def tx_monitoring(ctx):
+    """Config TX errors monitoring parameters"""
+    pass
+
+#
+# 'polling_period' command ('config tx-monitoring polling_period')
+#
+@tx_monitoring.command('polling_period')
+@click.argument('new_polling_period', type=click.IntRange(min=1), required=True)
+@click.pass_context
+def polling_period(ctx, new_polling_period):
+    """Config tx polling period"""
+    tx_config("Polling period", new_polling_period)
+
+#
+# 'threshold' command ('config tx-monitoring threshold')
+#
+@tx_monitoring.command('threshold')
+@click.argument('new_threshold', type=click.IntRange(min=1), required=True)
+@click.pass_context
+def threshold(ctx, new_threshold):
+    """Config tx errors threshold"""
+    tx_config('Threshold', new_threshold)
+
 if __name__ == '__main__':
     config()
