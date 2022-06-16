@@ -44,7 +44,7 @@ class DBMigrator():
                      none-zero values.
               build: sequentially increase within a minor version domain.
         """
-        self.CURRENT_VERSION = 'version_2_0_5'
+        self.CURRENT_VERSION = 'version_2_0_6'
 
         self.TABLE_NAME      = 'VERSIONS'
         self.TABLE_KEY       = 'DATABASE'
@@ -677,14 +677,31 @@ class DBMigrator():
             if 'pfc_enable' in v:
                 v['pfcwd_sw_enable'] = v['pfc_enable']
                 self.configDB.set_entry('PORT_QOS_MAP', k, v)
-
+        self.set_version('version_2_0_5')
         return 'version_2_0_5'
 
     def version_2_0_5(self):
         """
-        Current latest version. Nothing to do here.
+        Version 2_0_5
         """
         log.log_info('Handling version_2_0_5')
+        # Rename WARM_RESTART_TABLE to ADVANCED_RESTART_TABLE
+        keys = self.stateDB.keys(self.stateDB.STATE_DB, "WARM_RESTART_TABLE|*")
+        field = "restore_count"
+        if keys is not None:
+            for key in keys:
+                new_key = key.replace("WARM", "ADVANCED")
+                val = self.stateDB.get(self.stateDB.STATE_DB, key, field)
+                self.stateDB.set(self.stateDB.STATE_DB, new_key, field, val)
+                self.stateDB.del_key(self.stateDB.STATE_DB, key)
+        self.set_version('version_2_0_6')
+        return 'version_2_0_6'
+    
+    def version_2_0_6(self):
+        """
+        Current latest version. Nothing to do here.
+        """
+        log.log_info('Handling version_2_0_6')
         return None
 
     def get_version(self):

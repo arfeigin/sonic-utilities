@@ -2589,30 +2589,30 @@ def is_dynamic_buffer_enabled(config_db):
     return 'dynamic' == device_metadata.get('buffer_model')
 
 #
-# 'warm_restart' group ('config warm_restart ...')
+# 'advanced_restart' group ('config advanced_restart ...')
 #
-@config.group(cls=clicommon.AbbreviationGroup, name='warm_restart')
+@config.group(cls=clicommon.AbbreviationGroup, name='advanced_restart')
 @click.pass_context
 @click.option('-s', '--redis-unix-socket-path', help='unix socket path for redis connection')
-def warm_restart(ctx, redis_unix_socket_path):
-    """warm_restart-related configuration tasks"""
+def advanced_restart(ctx, redis_unix_socket_path):
+    """advanced_restart-related configuration tasks"""
     # Note: redis_unix_socket_path is a path string, and the ground truth is now from database_config.json.
     # We only use it as a bool indicator on either unix_socket_path or tcp port
     use_unix_socket_path = bool(redis_unix_socket_path)
     config_db = ConfigDBConnector(use_unix_socket_path=use_unix_socket_path)
     config_db.connect(wait_for_init=False)
 
-    # warm restart enable/disable config is put in stateDB, not persistent across cold reboot, not saved to config_DB.json file
+    # advanced restart enable/disable config is put in stateDB, not persistent across cold reboot, not saved to config_DB.json file
     state_db = SonicV2Connector(use_unix_socket_path=use_unix_socket_path)
     state_db.connect(state_db.STATE_DB, False)
     TABLE_NAME_SEPARATOR = '|'
-    prefix = 'WARM_RESTART_ENABLE_TABLE' + TABLE_NAME_SEPARATOR
+    prefix = 'ADVANCED_RESTART_ENABLE_TABLE' + TABLE_NAME_SEPARATOR
     ctx.obj = {'db': config_db, 'state_db': state_db, 'prefix': prefix}
 
-@warm_restart.command('enable')
+@advanced_restart.command('enable')
 @click.argument('module', metavar='<module>', default='system', required=False)
 @click.pass_context
-def warm_restart_enable(ctx, module):
+def advanced_restart_enable(ctx, module):
     state_db = ctx.obj['state_db']
     config_db = ctx.obj['db']
     feature_table = config_db.get_table('FEATURE')
@@ -2623,10 +2623,10 @@ def warm_restart_enable(ctx, module):
     state_db.set(state_db.STATE_DB, _hash, 'enable', 'true')
     state_db.close(state_db.STATE_DB)
 
-@warm_restart.command('disable')
+@advanced_restart.command('disable')
 @click.argument('module', metavar='<module>', default='system', required=False)
 @click.pass_context
-def warm_restart_enable(ctx, module):
+def advanced_restart_enable(ctx, module):
     state_db = ctx.obj['state_db']
     config_db = ctx.obj['db']
     feature_table = config_db.get_table('FEATURE')
@@ -2637,39 +2637,39 @@ def warm_restart_enable(ctx, module):
     state_db.set(state_db.STATE_DB, _hash, 'enable', 'false')
     state_db.close(state_db.STATE_DB)
 
-@warm_restart.command('neighsyncd_timer')
+@advanced_restart.command('neighsyncd_timer')
 @click.argument('seconds', metavar='<seconds>', required=True, type=int)
 @click.pass_context
-def warm_restart_neighsyncd_timer(ctx, seconds):
+def advanced_restart_neighsyncd_timer(ctx, seconds):
     db = ctx.obj['db']
     if seconds not in range(1, 9999):
-        ctx.fail("neighsyncd warm restart timer must be in range 1-9999")
-    db.mod_entry('WARM_RESTART', 'swss', {'neighsyncd_timer': seconds})
+        ctx.fail("neighsyncd advanced restart timer must be in range 1-9999")
+    db.mod_entry('ADVANCED_RESTART', 'swss', {'neighsyncd_timer': seconds})
 
-@warm_restart.command('bgp_timer')
+@advanced_restart.command('bgp_timer')
 @click.argument('seconds', metavar='<seconds>', required=True, type=int)
 @click.pass_context
-def warm_restart_bgp_timer(ctx, seconds):
+def advanced_restart_bgp_timer(ctx, seconds):
     db = ctx.obj['db']
     if seconds not in range(1, 3600):
-        ctx.fail("bgp warm restart timer must be in range 1-3600")
-    db.mod_entry('WARM_RESTART', 'bgp', {'bgp_timer': seconds})
+        ctx.fail("bgp advanced restart timer must be in range 1-3600")
+    db.mod_entry('ADVANCED_RESTART', 'bgp', {'bgp_timer': seconds})
 
-@warm_restart.command('teamsyncd_timer')
+@advanced_restart.command('teamsyncd_timer')
 @click.argument('seconds', metavar='<seconds>', required=True, type=int)
 @click.pass_context
-def warm_restart_teamsyncd_timer(ctx, seconds):
+def advanced_restart_teamsyncd_timer(ctx, seconds):
     db = ctx.obj['db']
     if seconds not in range(1, 3600):
-        ctx.fail("teamsyncd warm restart timer must be in range 1-3600")
-    db.mod_entry('WARM_RESTART', 'teamd', {'teamsyncd_timer': seconds})
+        ctx.fail("teamsyncd advanced restart timer must be in range 1-3600")
+    db.mod_entry('ADVANCED_RESTART', 'teamd', {'teamsyncd_timer': seconds})
 
-@warm_restart.command('bgp_eoiu')
+@advanced_restart.command('bgp_eoiu')
 @click.argument('enable', metavar='<enable>', default='true', required=False, type=click.Choice(["true", "false"]))
 @click.pass_context
-def warm_restart_bgp_eoiu(ctx, enable):
+def advanced_restart_bgp_eoiu(ctx, enable):
     db = ctx.obj['db']
-    db.mod_entry('WARM_RESTART', 'bgp', {'bgp_eoiu': enable})
+    db.mod_entry('ADVANCED_RESTART', 'bgp', {'bgp_eoiu': enable})
 
 def mvrf_restart_services():
     """Restart interfaces-config service and NTP service when mvrf is changed"""
