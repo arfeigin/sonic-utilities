@@ -806,7 +806,7 @@ class DBMigrator():
 
     def version_3_0_5(self):
         """
-        Current latest version. Nothing to do here.
+        Version 3_0_5
         """
         log.log_info('Handling version_3_0_5')
         # Update state-db fast-reboot entry to enable if set to enable fast-reboot finalizer when using upgrade with fast-reboot
