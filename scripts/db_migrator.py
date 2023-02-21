@@ -822,14 +822,18 @@ class DBMigrator():
             keys = self.loglevelDB.keys(self.loglevelDB.LOGLEVEL_DB, "*")
             if keys is not None:
                 for key in keys:
-                    if key != "JINJA2_CACHE":
-                        fvs = self.loglevelDB.get_all(self.loglevelDB.LOGLEVEL_DB, key)
-                        component = key.split(":")[1]
-                        loglevel = fvs[loglevel_field]
-                        logoutput = fvs[logoutput_field]
-                        self.configDB.set(self.configDB.CONFIG_DB, '{}|{}'.format(table_name, component), loglevel_field, loglevel)
-                        self.configDB.set(self.configDB.CONFIG_DB, '{}|{}'.format(table_name, component), logoutput_field, logoutput)
-                    self.loglevelDB.delete(self.loglevelDB.LOGLEVEL_DB, key)
+                    try:
+                        if key != "JINJA2_CACHE":
+                            fvs = self.loglevelDB.get_all(self.loglevelDB.LOGLEVEL_DB, key)
+                            component = key.split(":")[1]
+                            loglevel = fvs[loglevel_field]
+                            logoutput = fvs[logoutput_field]
+                            self.configDB.set(self.configDB.CONFIG_DB, '{}|{}'.format(table_name, component), loglevel_field, loglevel)
+                            self.configDB.set(self.configDB.CONFIG_DB, '{}|{}'.format(table_name, component), logoutput_field, logoutput)
+                    except Exception as err:
+                        log.log_warning('Error occured during LOGLEVEL_DB migration for {}. Ignoring key {}'.format(err, key))
+                    finally:
+                        self.loglevelDB.delete(self.loglevelDB.LOGLEVEL_DB, key)
         self.set_version('version_3_0_6')
         return 'version_3_0_6'
 
@@ -900,7 +904,12 @@ class DBMigrator():
                 new_cfg = {**init_cfg, **curr_cfg}
                 self.configDB.set_entry(init_cfg_table, key, new_cfg)
 
-        self.migrate_copp_table()
+        # Avoiding copp table migration is platform specific at the moment as I understood this might cause issues for some
+        # vendors, probably Broadcom. This change can be checked with any specific vendor and if this works fine the platform
+        # condition can be modified and extend. If no vendor has an issue with not clearing copp tables the condition can be
+        # removed together with calling to migrate_copp_table function.
+        if self.asic_type != "mellanox":
+            self.migrate_copp_table()
         if self.asic_type == "broadcom" and 'Force10-S6100' in self.hwsku:            
             self.migrate_mgmt_ports_on_s6100()
         else:
