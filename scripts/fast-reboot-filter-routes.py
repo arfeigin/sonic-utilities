@@ -30,8 +30,12 @@ def get_connected_routes():
 
 def get_route(db, route):
     key = 'ROUTE_TABLE:%s' % route
-    route = db.keys(db.APPL_DB, key)
-    return route[0].split(":", 1)[1]
+    val = db.keys(db.APPL_DB, key)
+    try:
+        route = val[0].split(":", 1)[1]
+    except IndexError:
+        route = None
+    return route
 
 def generate_default_route_entries():
     db = ConfigDBConnector()
