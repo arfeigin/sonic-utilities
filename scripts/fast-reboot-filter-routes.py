@@ -10,6 +10,8 @@ import click
 from builtins import str #for unicode conversion in python2
 from swsscommon.swsscommon import ConfigDBConnector
 
+ROUTE_OFFSET = 1
+
 def get_connected_routes():
     cmd = 'sudo vtysh -c "show ip route connected json"'
     connected_routes = []
@@ -31,11 +33,10 @@ def get_connected_routes():
 def get_route(db, route):
     key = 'ROUTE_TABLE:%s' % route
     val = db.keys(db.APPL_DB, key)
-    try:
-        route = val[0].split(":", 1)[1]
-    except IndexError:
-        route = None
-    return route
+    if val:
+        return val[0].split(":", 1)[ROUTE_OFFSET]
+    else:
+        return None
 
 def generate_default_route_entries():
     db = ConfigDBConnector()
@@ -61,7 +62,7 @@ def filter_routes(preserved_routes):
     routes = db.keys(db.APPL_DB, key)
 
     for route in routes:
-        stripped_route = route.split(":", 1)[1]
+        stripped_route = route.split(":", 1)[ROUTE_OFFSET]
         if stripped_route not in preserved_routes:
             db.delete(db.APPL_DB, route)
 
