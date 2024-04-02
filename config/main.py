@@ -35,6 +35,7 @@ from utilities_common.intf_filter import parse_interface_in_filter
 from utilities_common import bgp_util
 import utilities_common.cli as clicommon
 from utilities_common.helper import get_port_pbh_binding, get_port_acl_binding, update_config
+from utilities_common.helper import validate_interface_name_length
 from utilities_common.general import load_db_config, load_module_from_source
 from .validated_config_db_connector import ValidatedConfigDBConnector
 import utilities_common.multi_asic as multi_asic_util
@@ -98,7 +99,6 @@ CFG_LOOPBACK_NO="<0-999>"
 
 CFG_PORTCHANNEL_PREFIX = "PortChannel"
 CFG_PORTCHANNEL_PREFIX_LEN = 11
-CFG_PORTCHANNEL_NAME_TOTAL_LEN_MAX = 15
 CFG_PORTCHANNEL_MAX_VAL = 9999
 CFG_PORTCHANNEL_NO="<0-9999>"
 
@@ -427,7 +427,7 @@ def is_portchannel_name_valid(portchannel_name):
     if (portchannel_name[CFG_PORTCHANNEL_PREFIX_LEN:].isdigit() is False or
           int(portchannel_name[CFG_PORTCHANNEL_PREFIX_LEN:]) > CFG_PORTCHANNEL_MAX_VAL) :
         return False
-    if len(portchannel_name) > CFG_PORTCHANNEL_NAME_TOTAL_LEN_MAX:
+    if validate_interface_name_length(portchannel_name) is False:
         return False
     return True
 
@@ -2176,7 +2176,7 @@ def add_portchannel(ctx, portchannel_name, min_links, fallback, fast_rate):
     if ADHOC_VALIDATION:
         if is_portchannel_name_valid(portchannel_name) != True:
             ctx.fail("{} is invalid!, name should have prefix '{}' and suffix '{}' and its length should not exceed {} characters"
-                    .format(portchannel_name, CFG_PORTCHANNEL_PREFIX, CFG_PORTCHANNEL_NO, CFG_PORTCHANNEL_NAME_TOTAL_LEN_MAX))
+                    .format(portchannel_name, CFG_PORTCHANNEL_PREFIX, CFG_PORTCHANNEL_NO, IFNAMSIZ))
         if is_portchannel_present_in_db(db, portchannel_name):
             ctx.fail("{} already exists!".format(portchannel_name)) # TODO: MISSING CONSTRAINT IN YANG MODEL
     
@@ -5570,7 +5570,7 @@ def add_vrf(ctx, vrf_name):
     config_db = ValidatedConfigDBConnector(ctx.obj['config_db'])
     if not vrf_name.startswith("Vrf") and not (vrf_name == 'mgmt') and not (vrf_name == 'management'):
         ctx.fail("'vrf_name' must begin with 'Vrf' or named 'mgmt'/'management' in case of ManagementVRF.")
-    if len(vrf_name) > IFNAMSIZ:
+    if validate_interface_name_length(vrf_name) is False:
         ctx.fail("'vrf_name' length should not exceed {} characters".format(IFNAMSIZ))
     if is_vrf_exists(config_db, vrf_name):
         ctx.fail("VRF {} already exists!".format(vrf_name))
@@ -5590,7 +5590,7 @@ def del_vrf(ctx, vrf_name):
     config_db = ValidatedConfigDBConnector(ctx.obj['config_db'])
     if not vrf_name.startswith("Vrf") and not (vrf_name == 'mgmt') and not (vrf_name == 'management'):
         ctx.fail("'vrf_name' must begin with 'Vrf' or named 'mgmt'/'management' in case of ManagementVRF.")
-    if len(vrf_name) > IFNAMSIZ:
+    if validate_interface_name_length(vrf_name) is False:
         ctx.fail("'vrf_name' length should not exceed {} characters".format(IFNAMSIZ))
     syslog_table = config_db.get_table("SYSLOG_SERVER")
     syslog_vrf_dev = "mgmt" if vrf_name == "management" else vrf_name
@@ -7344,7 +7344,7 @@ def add_subinterface(ctx, subinterface_name, vid):
         if interface_alias is None:
             ctx.fail("{} invalid subinterface".format(interface_alias))
         
-        if len(subinterface_name) >= IFNAMSIZ:
+        if validate_interface_name_length(subinterface_name) is False:
             ctx.fail("Subinterface name length should not exceed {} characters".format(IFNAMSIZ))
 
         if interface_alias.startswith("Po") is True:
