@@ -6,6 +6,7 @@ from .validated_config_db_connector import ValidatedConfigDBConnector
 from swsscommon.swsscommon import validate_interface_name_length, iface_name_max_length
 
 ADHOC_VALIDATION = True
+IFNAMSIZ = 16
 #
 # 'vxlan' group ('config vxlan ...')
 #

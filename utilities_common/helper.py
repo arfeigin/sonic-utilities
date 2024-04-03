@@ -3,6 +3,8 @@ from dump.match_helper import get_matched_keys
 from .db import Db
 import copy
 
+IFNAMSIZ = 16
+
 def get_port_acl_binding(db_wrap, port, ns):
     """
     Verify if the port is not bound to any ACL Table
@@ -33,6 +35,13 @@ def get_port_acl_binding(db_wrap, port, ns):
     ret = m_engine.fetch(req)
     acl_tables, _ = get_matched_keys(ret)
     return acl_tables
+
+
+def validate_interface_name_length(iface_name):
+    """
+    Verify that interface name length does not exceed IFNAMSIZ
+    """ 
+    return True if len(iface_name) >= IFNAMSIZ else False
 
 
 def get_port_pbh_binding(db_wrap, port, ns):
