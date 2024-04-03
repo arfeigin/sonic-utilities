@@ -5,6 +5,7 @@ from jsonpatch import JsonPatchConflict
 from .validated_config_db_connector import ValidatedConfigDBConnector
 
 ADHOC_VALIDATION = True
+IFNAMSIZ = 16
 #
 # 'vxlan' group ('config vxlan ...')
 #
@@ -24,6 +25,8 @@ def add_vxlan(db, vxlan_name, src_ip):
     if ADHOC_VALIDATION:
         if not clicommon.is_ipaddress(src_ip):
             ctx.fail("{} invalid src ip address".format(src_ip))  
+        if len(vxlan_name) >= IFNAMSIZ:
+           ctx.fail("'vxlan_name' length should not exceed {} characters".format(IFNAMSIZ))
 
     vxlan_keys = db.cfgdb.get_keys('VXLAN_TUNNEL')
     if not vxlan_keys:
