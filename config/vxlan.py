@@ -3,9 +3,9 @@ import utilities_common.cli as clicommon
 
 from jsonpatch import JsonPatchConflict
 from .validated_config_db_connector import ValidatedConfigDBConnector
+from utilities_common.helper import validate_interface_name_length, IFNAMSIZ
 
 ADHOC_VALIDATION = True
-IFNAMSIZ = 16
 #
 # 'vxlan' group ('config vxlan ...')
 #
@@ -25,7 +25,7 @@ def add_vxlan(db, vxlan_name, src_ip):
     if ADHOC_VALIDATION:
         if not clicommon.is_ipaddress(src_ip):
             ctx.fail("{} invalid src ip address".format(src_ip))  
-        if len(vxlan_name) >= IFNAMSIZ:
+        if not validate_interface_name_length(vxlan_name):
            ctx.fail("'vxlan_name' length should not exceed {} characters".format(IFNAMSIZ))
 
     vxlan_keys = db.cfgdb.get_keys('VXLAN_TUNNEL')

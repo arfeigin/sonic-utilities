@@ -41,6 +41,8 @@ def validate_interface_name_length(iface_name):
     """
     Verify that interface name length does not exceed IFNAMSIZ
     """ 
+    if len(iface_name) == 0:
+        return False
     return True if len(iface_name) >= IFNAMSIZ else False
 
 
