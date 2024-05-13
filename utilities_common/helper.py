@@ -8,16 +8,16 @@ IFNAMSIZ = 16
 def get_port_acl_binding(db_wrap, port, ns):
     """
     Verify if the port is not bound to any ACL Table
-    
+
     Args:
         db_wrap: utilities_common.Db() object
         port: Iface name
         ns: namespace
 
     Returns:
-        list: ACL_TABLE names if found, 
+        list: ACL_TABLE names if found,
                 otherwise empty
-    """ 
+    """
     ACL = "ACL_TABLE" # Table to look for port bindings
     if not isinstance(db_wrap, Db):
         raise Exception("db_wrap object is not of type utilities_common.Db")
@@ -40,25 +40,25 @@ def get_port_acl_binding(db_wrap, port, ns):
 def validate_interface_name_length(iface_name):
     """
     Verify that interface name length does not exceed IFNAMSIZ
-    """ 
+    """
     if len(iface_name) == 0:
         return False
-    return True if len(iface_name) >= IFNAMSIZ else False
+    return True if len(iface_name) < IFNAMSIZ else False
 
 
 def get_port_pbh_binding(db_wrap, port, ns):
     """
     Verify if the port is not bound to any PBH Table
-    
+
     Args:
         db_wrap: Db() object
         port: Iface name
         ns: namespace
 
     Returns:
-        list: PBH_TABLE names if found, 
+        list: PBH_TABLE names if found,
                 otherwise empty
-    """ 
+    """
     PBH = "PBH_TABLE" # Table to look for port bindings
     if not isinstance(db_wrap, Db):
         raise Exception("db_wrap object is not of type utilities_common.Db")
