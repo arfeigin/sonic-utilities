@@ -5835,7 +5835,7 @@ def add_vrf(ctx, vrf_name):
     config_db = ValidatedConfigDBConnector(ctx.obj['config_db'])
     if not vrf_name.startswith("Vrf") and not (vrf_name == 'mgmt') and not (vrf_name == 'management'):
         ctx.fail("'vrf_name' must begin with 'Vrf' or named 'mgmt'/'management' in case of ManagementVRF.")
-    if not validate_interface_name_length(portchannel_name):
+    if not validate_interface_name_length(vrf_name):
         ctx.fail("'vrf_name' length should not exceed {} characters".format(IFNAMSIZ))
     if is_vrf_exists(config_db, vrf_name):
         ctx.fail("VRF {} already exists!".format(vrf_name))
@@ -5855,7 +5855,7 @@ def del_vrf(ctx, vrf_name):
     config_db = ValidatedConfigDBConnector(ctx.obj['config_db'])
     if not vrf_name.startswith("Vrf") and not (vrf_name == 'mgmt') and not (vrf_name == 'management'):
         ctx.fail("'vrf_name' must begin with 'Vrf' or named 'mgmt'/'management' in case of ManagementVRF.")
-    if not validate_interface_name_length(portchannel_name):
+    if not validate_interface_name_length(vrf_name):
         ctx.fail("'vrf_name' length should not exceed {} characters".format(IFNAMSIZ))
     syslog_table = config_db.get_table("SYSLOG_SERVER")
     syslog_vrf_dev = "mgmt" if vrf_name == "management" else vrf_name
@@ -7608,7 +7608,7 @@ def add_subinterface(ctx, subinterface_name, vid):
 
         if interface_alias is None:
             ctx.fail("{} invalid subinterface".format(interface_alias))
-        if not validate_interface_name_length(portchannel_name):
+        if not validate_interface_name_length(interface_alias):
             ctx.fail("Subinterface name length should not exceed {} characters".format(IFNAMSIZ))
 
         if interface_alias.startswith("Po") is True:
