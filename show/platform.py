@@ -17,7 +17,7 @@ def get_chassis_info():
     call fails we simply return N/A.
     """
 
-    keys = ["serial", "model", "revision"]
+    keys = ["serial", "model", "revision", "sys_display"]
 
     def try_get(platform, attr, fallback):
         try:
@@ -62,6 +62,7 @@ def summary(json):
         click.echo("ASIC: {}".format(platform_info['asic_type']))
         click.echo("ASIC Count: {}".format(platform_info['asic_count']))
         click.echo("Serial Number: {}".format(chassis_info['serial']))
+        click.echo("System Display Name: {}".format(chassis_info['sys_display']))
         click.echo("Model Number: {}".format(chassis_info['model']))
         click.echo("Hardware Revision: {}".format(chassis_info['revision']))
         switch_type = platform_info.get('switch_type')
