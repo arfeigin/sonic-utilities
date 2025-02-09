@@ -28,6 +28,7 @@ class TestShowPlatform(object):
     TEST_ASIC_TYPE = "mellanox"
     TEST_ASIC_COUNT = 1
     TEST_SERIAL = "MT1822K07815"
+    TEST_SYS_DISPLAY = "N/A"
     TEST_MODEL = "MSN2700-CS2FO"
     TEST_REV = "A1"
 
@@ -39,14 +40,15 @@ class TestShowPlatform(object):
             ASIC: {}
             ASIC Count: {}
             Serial Number: {}
+            System Display Name: {}
             Model Number: {}
             Hardware Revision: {}
-            """.format(self.TEST_PLATFORM, self.TEST_HWSKU, self.TEST_ASIC_TYPE, self.TEST_ASIC_COUNT, self.TEST_SERIAL, self.TEST_MODEL, self.TEST_REV)
+            """.format(self.TEST_PLATFORM, self.TEST_HWSKU, self.TEST_ASIC_TYPE, self.TEST_ASIC_COUNT, self.TEST_SERIAL, self.TEST_SYS_DISPLAY, self.TEST_MODEL, self.TEST_REV)
 
         with mock.patch("sonic_py_common.device_info.get_platform_info",
                 return_value={"platform": self.TEST_PLATFORM, "hwsku": self.TEST_HWSKU, "asic_type": self.TEST_ASIC_TYPE, "asic_count": self.TEST_ASIC_COUNT}):
             with mock.patch("show.platform.get_chassis_info",
-                            return_value={"serial": self.TEST_SERIAL, "model": self.TEST_MODEL, "revision": self.TEST_REV}):
+                            return_value={"serial": self.TEST_SERIAL, "model": self.TEST_MODEL, "revision": self.TEST_REV, "sys_display": self.TEST_SYS_DISPLAY}):
                 result = CliRunner().invoke(show.cli.commands["platform"].commands["summary"], [])
                 assert result.output == textwrap.dedent(expected_output)
 
